@@ -1,11 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 import 'forgot_password.dart';
-import 'login_api.dart';
 import 'signup.dart';
 
 class Login extends StatefulWidget {
@@ -19,8 +19,6 @@ TextEditingController emailLoginController = TextEditingController();
 TextEditingController passwordLoginController = TextEditingController();
 
 class _LoginState extends State<Login> {
-  final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
-
   @override
   void dispose() {
     emailLoginController.dispose();
@@ -30,6 +28,7 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalKey<FormState> _loginFormKey = GlobalKey<FormState>();
     loginApiCall() async {
       final response = await post(
           Uri.parse("https://sowlab.pw/assignment/user/login"),
@@ -246,16 +245,19 @@ class _LoginState extends State<Login> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      var user = await LoginApi.login();
-                      if (user != null) {
-                        print(user.displayName);
-                        print(user.email);
+                      GoogleSignIn _googleSignIn = GoogleSignIn();
+                      try {
+                        await _googleSignIn.signOut();
 
+                        var user = await _googleSignIn.signIn();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(
-                              'Login successful with username : ${user.displayName} and email : ${user.email}'),
+                              'Login successful with username : ${user!.displayName} and email : ${user.email}'),
                           backgroundColor: Colors.green,
                         ));
+                        print(user);
+                      } catch (e) {
+                        print(e);
                       }
                     },
                     child: Container(

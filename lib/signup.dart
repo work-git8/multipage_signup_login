@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/signup_farminfo.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:icons_plus/icons_plus.dart';
 
 import 'login.dart';
-import 'login_api.dart';
 
 TextEditingController fullNameController = TextEditingController();
 TextEditingController emailController = TextEditingController();
@@ -85,16 +85,19 @@ class _SignUpState extends State<SignUp> {
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      var user = await LoginApi.login();
-                      if (user != null) {
-                        print(user.displayName);
-                        print(user.email);
+                      GoogleSignIn _googleSignIn = GoogleSignIn();
+                      try {
+                        await _googleSignIn.signOut();
 
+                        var user = await _googleSignIn.signIn();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                           content: Text(
-                              'Login successful with username : ${user.displayName} and email : ${user.email}'),
+                              'Login successful with username : ${user!.displayName} and email : ${user.email}'),
                           backgroundColor: Colors.green,
                         ));
+                        print(user);
+                      } catch (e) {
+                        print(e);
                       }
                     },
                     child: Container(
